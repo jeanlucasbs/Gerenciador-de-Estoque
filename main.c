@@ -44,6 +44,8 @@ bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i);
 void Titulo();
 bool voltarOuRepetir(); 
 int confereIDCategoria(LISTA *l);
+bool deletaProduto(LISTA* l, int i);
+void exibirCategorias(LISTA *l);
 void sair(); 
 
 //Menu Principal
@@ -52,7 +54,7 @@ int main(){
   REGISTRO_PRODUTO regProduto;
   REGISTRO_CATEGORIA regCategoria;
 
-  int cat, op;
+  int id, opc;
   int idTemporarioProduto, idTemporarioCategoria;
   int opcao;
 
@@ -64,10 +66,11 @@ int main(){
   do{
     Titulo();
     printf("OPERACOES:\n");
-    printf(" 1 - Cadastrar um produto\n");
-    printf(" 2 - Cadastrar categoria\n");
-    printf(" 3 - Deletar produto\n");
-    printf(" 4 - Deletar categoria\n");
+    printf(" 1 - Cadastrar um produto\n");//ok
+    printf(" 2 - Cadastrar categoria\n");//ok
+    printf(" 3 - Deletar categoria\n");
+    printf(" 4 - Deletar produto\n");//ok
+    printf(" 5 - Exibir categorias\n");//ok
     printf(" 0 - Sair\n");
     printf("Digite uma opcao: ");
     scanf("%d", &opcao);
@@ -148,7 +151,36 @@ int main(){
           }
         }
         break;
+      case 3:
+        break;
+      
+      case 4:
+        while(true){
+          system("clear");
+          Titulo();
+          printf("Digite o ID do produto para ser excluido: ");
+          scanf("%d", &id);
+          deletaProduto(&l, id);
 
+          if(voltarOuRepetir()){
+            system("clear");
+            break;
+          }
+          system("clear");
+        }
+        break;
+      case 5:
+        system("clear");
+        Titulo();
+        printf("CATEGORIAS DISPONIVEIS:\n\n");
+        exibirCategorias(&l);
+        
+        if(!(voltarOuRepetir())){
+          system("clear");
+          break;
+        }
+        
+        break;
       case 0:
         sair();
         break;
@@ -298,6 +330,53 @@ int confereIDCategoria(LISTA *l) {
 		aux = true;
 	}
 	return temporario;
+}
+
+//Deletar produto
+bool deletaProduto(LISTA* l, int i){
+  int aux1, aux2, k;
+  bool tp;
+
+  tp = false;
+
+  for(aux1 = 0; aux1 < l->tamanhoListaCategoria; aux1++){
+    for(aux2 = 0; aux2 < l->registroCategoria[aux1].tamanhoListaProduto; aux2++){
+      if(l->registroCategoria[aux1].registroProduto[aux2].chaveProduto == i){
+        tp = true;
+        break;
+      }
+    }
+    if(tp == true){
+      break;
+    }
+  }
+  if(tp == true){
+    for(k = aux2; k < l->registroCategoria[aux1].tamanhoListaProduto -1; k++){
+      l->registroCategoria[aux1].registroProduto[k] = l->registroCategoria[aux1].registroProduto[k+1];
+    }
+
+    l->registroCategoria[aux1].tamanhoListaProduto--;
+    printf("Produto excluido com sucesso!\n");
+    return true;
+  }
+  printf("Produto não existe\n") ;
+  return false;
+
+}
+
+//Exibir Categoria
+
+void exibirCategorias(LISTA *l){
+  
+  int i;
+  if(tamanho(l) > 0){
+    for(i = 0; i < l->tamanhoListaCategoria; i++){
+      printf("Nome: %s\nID Categoria: %d\n\n", l->registroCategoria[i].nomeCategoria, l->registroCategoria[i].chaveCategoria);
+    }
+  }
+  else{
+    printf("Ainda não foram cadastradas categorias! Crie uma categoria antes\n\n");
+  }
 }
 
 // --- Sair ---
