@@ -44,9 +44,11 @@ bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i);
 bool cadastrarProduto(LISTA *l, int idCategoria, REGISTRO_PRODUTO reg);
 bool voltarOuRepetirOP(); 
 int confereIDCategoria(LISTA *l);
-bool deletaProduto(LISTA* l, int i);
+bool deletaCategoria(LISTA *l, int idCategoria);
+bool deletaProduto(LISTA* l, int idProduto);
 void exibirCategorias(LISTA *l);
 bool exibirTodosProdutos(LISTA *l);
+bool buscarProduto(LISTA *l, TIPOCHAVE idProduto);
 void sair(); 
 
 //Menu Principal
@@ -55,8 +57,8 @@ int main(){
   REGISTRO_PRODUTO regProduto;
   REGISTRO_CATEGORIA regCategoria;
 
-  int id, opc;
-  int idTemporarioProduto, idTemporarioCategoria;
+  int delProd, delCat;
+  int idTemCat, idBusca;
   int opcao;
 
   inicializarLista(&l);
@@ -68,16 +70,18 @@ int main(){
   do{
     Titulo();
     printf("OPERACOES:\n");
-    printf(" 1 - Cadastrar um produto\n");//ok
+    printf(" 1 - Cadastrar produto\n");//ok
     printf(" 2 - Cadastrar categoria\n");//ok
-    printf(" 3 - Deletar categoria\n");
+    printf(" 3 - Deletar categoria\n");//ok
     printf(" 4 - Deletar produto\n");//ok
     printf(" 5 - Exibir categorias\n");//ok
-    printf(" 6 - Exibir todos os produtos\n");
+    printf(" 6 - Exibir todos os produtos\n");//ok
+    printf(" 7 - Buscar produto\n");//ok
+    printf(" 8 - Atualizar produto\n");
     printf(" 0 - Sair\n");//ok
     printf("Digite uma opcao: ");
     scanf("%d", &opcao);
-    while(opcao < 0 || opcao >6){
+    while(opcao < 0 || opcao > 8){
       printf("Opção inválida, digite novamente: ");
       scanf("%d", &opcao);
     }
@@ -111,10 +115,10 @@ int main(){
             scanf("%d", &regProduto.quantidade);
 
             printf("Digite o id de identifição da categoria que quer vincular o produto (0 para cancelar operação): ");
-            scanf("%d", &idTemporarioCategoria);
+            scanf("%d", &idTemCat);
 
             //Verificação de cancelamento da operação
-            if(idTemporarioCategoria == -1){
+            if(idTemCat == -1){
               regProduto.nomeProduto[0] = '\0';
 
               if(!(voltarOuRepetirOP())){
@@ -123,7 +127,7 @@ int main(){
             }
             else{
               //Chamando a função para cadastro do produto
-              cadastrarProduto(&l, idTemporarioCategoria, regProduto);
+              cadastrarProduto(&l, idTemCat, regProduto);
 
               if(!(voltarOuRepetirOP())){
                 system("clear");
@@ -157,22 +161,31 @@ int main(){
         }
         break;
       case 3:
+        while(true){
+          system("clear");
+          Titulo();
+          printf("Digite o ID da categoria que deseja excluir: ");
+          scanf("%d", &delCat);
+          deletaCategoria(&l, delCat);
+          
+          if(!(voltarOuRepetirOP())){
+            break;
+          }
+        }
+        system("clear");
         break;
-      
       case 4:
         while(true){
           system("clear");
           Titulo();
           printf("Digite o ID do produto para ser excluido: ");
-          scanf("%d", &id);
-          deletaProduto(&l, id);
-
+          scanf("%d", &delProd);
+          deletaProduto(&l, delProd);
           if(!(voltarOuRepetirOP())){
-            system("clear");
             break;
           }
-          system("clear");
-        } 
+        }
+        system("clear");
         break;
       case 5:
         system("clear");
@@ -184,6 +197,20 @@ int main(){
         system("clear");
         while(true){
           exibirTodosProdutos(&l);
+          if(!(voltarOuRepetirOP())){
+              system("clear");
+              break;
+            }
+        }
+        break;
+      case 7:
+        while(true){
+          system("clear");
+          Titulo();
+          printf("BUSCA DE PRODUTO\n");
+          printf("Digite o ID do produto: ");
+          scanf("%d", &idBusca);
+          buscarProduto(&l, idBusca);
           if(!(voltarOuRepetirOP())){
               system("clear");
               break;
@@ -319,27 +346,68 @@ bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i){
 int confereIDCategoria(LISTA *l) {
   setlocale(LC_ALL, "");
 	int i;
-  bool aux = true;
-	TIPOCHAVE temporario;
+  bool j = true;
+	TIPOCHAVE aux;
 	
   //Verificar se já existe o mesmo ID na lista
 	while(true) {
-		scanf("%d", &temporario);
+		scanf("%d", &aux);
 		for(i = 0; i < l->tamanhoListaCategoria; i++) {
-			if (l->registroCategoria[i].chaveCategoria == temporario) {
-				printf("O id ja existe! Digite outro: ");
-				aux = false;
+			if (l->registroCategoria[i].chaveCategoria == aux) {
+				printf("Esse ID ja existe! Digite outro: ");
+				j = false;
 				break;
 			}
 		}
-		if (aux) break;		
-		aux = true;
+		if(j){
+      break;
+    }		
+		j = true;
 	}
-	return temporario;
+	return aux;
+}
+
+//Deletar categoria
+bool deletaCategoria(LISTA *l, int idCategoria){
+  int i, j;
+  bool k = false;
+
+  if(idCategoria <= 0 || l->tamanhoListaCategoria == 0){
+    return false;
+  }
+
+  //Verificar se existe a categoria na lista
+  for(i = 0; i < l->tamanhoListaCategoria; i++){
+    if(l->registroCategoria[i].chaveCategoria == idCategoria){
+      k = true;
+      break; 
+    }
+  }
+
+  if(k == true){
+    for(j = 0; j < l->registroCategoria[i].tamanhoListaProduto; j++){
+      l->registroCategoria[i].registroProduto[j].nomeProduto[0] = '\0';
+    }
+
+    l->registroCategoria[i].nomeCategoria[0] = '\0';
+    l->registroCategoria[i].tamanhoListaProduto = 0;
+
+    for(j = i; i < l->tamanhoListaCategoria - 1; j++){
+      l->registroCategoria[i] = l->registroCategoria[i+1];
+    }
+
+    l->tamanhoListaCategoria--;
+    printf("\nCategoria deletada com sucesso!\n");
+    return true;
+  }
+  else{
+    printf("\nID da categoria não foi encontrado.\n");
+    return false;
+  }  
 }
 
 //Deletar produto
-bool deletaProduto(LISTA* l, int i){
+bool deletaProduto(LISTA* l, int idProduto){
   int aux1, aux2, k;
   bool tp;
 
@@ -347,7 +415,7 @@ bool deletaProduto(LISTA* l, int i){
 
   for(aux1 = 0; aux1 < l->tamanhoListaCategoria; aux1++){
     for(aux2 = 0; aux2 < l->registroCategoria[aux1].tamanhoListaProduto; aux2++){
-      if(l->registroCategoria[aux1].registroProduto[aux2].chaveProduto == i){
+      if(l->registroCategoria[aux1].registroProduto[aux2].chaveProduto == idProduto){
         tp = true;
         break;
       }
@@ -385,17 +453,17 @@ void exibirCategorias(LISTA *l){
 
 //Exibir todos os produtos do estoque
 bool exibirTodosProdutos(LISTA *l){
-  int tamanhoCategoria = l->tamanhoListaCategoria;
   int tamanhoProdutos;
+  int i, j;
 
   Titulo();
   printf("LISTA DE PRODUTOS CADASTRADOS\n\n");
-  if(tamanhoCategoria == 0){
+  if(l->tamanhoListaCategoria == 0){
     printf("Sem cadastro de produtos e categorias.\n\n");
     return false;
   }
   else{
-    for(int i = 0; i < tamanhoCategoria; i++){
+    for(i = 0; i < l->tamanhoListaCategoria; i++){
       tamanhoProdutos = l->registroCategoria[i].tamanhoListaProduto;
       if(tamanhoProdutos == 0){
         printf("Nome da categoria: %s - ID: %d\n", l->registroCategoria[i].nomeCategoria, l->registroCategoria[i].chaveCategoria);
@@ -403,7 +471,7 @@ bool exibirTodosProdutos(LISTA *l){
       }
       else{
         printf("Nome da categoria: %s - ID: %d\n", l->registroCategoria[i].nomeCategoria, l->registroCategoria[i].chaveCategoria);
-        for(int j = 0; j < tamanhoProdutos; j++){
+        for(j = 0; j < tamanhoProdutos; j++){
           printf("Nome do produto: %s\nID: %d\n", l->registroCategoria[i].registroProduto[j].nomeProduto,l->registroCategoria[i].registroProduto[j].chaveProduto);
           printf("Preço: %.2f\nQuantidade em estoque: %d\n\n", l->registroCategoria[i].registroProduto[j].valor,l->registroCategoria[i].registroProduto[j].quantidade);
         }
@@ -414,7 +482,35 @@ bool exibirTodosProdutos(LISTA *l){
   return true;
 }
 
-// --- Sair ---
+//Buscar por produto especifico
+bool buscarProduto(LISTA *l, TIPOCHAVE idProduto){
+  int i, j;
+  bool k = false;
+
+  for(i = 0; i < l->tamanhoListaCategoria; i++){
+    for(j = 0; j < l->registroCategoria[i].tamanhoListaProduto; j++){
+      if(l->registroCategoria[i].registroProduto[j].chaveProduto == idProduto){
+        k = true;
+        break;
+      }
+    }
+    if(k == true){
+      break;
+    }
+  }
+
+  if(k == true){
+    printf("\nNome do produto: %s\nID: %d\n", l->registroCategoria[i].registroProduto[j].nomeProduto, l->registroCategoria[i].registroProduto[j].chaveProduto);
+    printf("Preço: %.2f\nQuantidade em estoque: %d\n\n", l->registroCategoria[i].registroProduto[j].valor,l->registroCategoria[i].registroProduto[j].quantidade);
+    return true;
+  }
+  else{
+    printf("Produto não foi encontrado.\n\n");
+    return false;
+  }
+}
+
+//Sair
 void sair() {
 	system("clear");;
 	Titulo();
