@@ -6,9 +6,7 @@
 
 #define MAX_PRODUTO 100
 #define MAX_CATEGORIA 50
-#define MAX_NOME 5
-
-//Definindo as listas
+#define MAX_NOME 40
 
 typedef int TIPOCHAVE;
 
@@ -36,29 +34,29 @@ typedef struct {
 } LISTA;
 
 
-//Funcoes
-void inicializarLista(LISTA* l);
-int tamanho(LISTA* l);
+//Funções
 void Titulo();
+bool voltarOuRepetirOP(); 
+int tamanho(LISTA* l);
+void inicializarLista(LISTA* l);
 bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i);
 bool cadastrarProduto(LISTA *l, int idCategoria, REGISTRO_PRODUTO reg);
-bool voltarOuRepetirOP(); 
 int confereIDCategoria(LISTA *l);
-bool deletaCategoria(LISTA *l, int idCategoria);
-bool deletaProduto(LISTA* l, int idProduto);
+bool excluirCategoria(LISTA *l, int idCategoria);
+bool excluirProduto(LISTA* l, int idProduto);
 void exibirCategorias(LISTA *l);
 bool exibirTodosProdutos(LISTA *l);
 bool buscarProduto(LISTA *l, TIPOCHAVE idProduto);
-void sair(); 
+bool atualizarProduto(LISTA *l, int idTemPro); 
 
-//Menu Principal
+
 int main(){
   LISTA l;
   REGISTRO_PRODUTO regProduto;
   REGISTRO_CATEGORIA regCategoria;
 
   int delProd, delCat;
-  int idTemCat, idBusca;
+  int idTemCat, idTemPro, idBusca;
   int opcao;
 
   inicializarLista(&l);
@@ -66,7 +64,7 @@ int main(){
 
   setlocale(LC_ALL, "");
 
-  //Menu
+  //MENU PRINCIPAL
   do{
     Titulo();
     printf("OPERACOES:\n");
@@ -77,32 +75,32 @@ int main(){
     printf(" 5 - Exibir categorias\n");//ok
     printf(" 6 - Exibir todos os produtos\n");//ok
     printf(" 7 - Buscar produto\n");//ok
-    printf(" 8 - Atualizar produto\n");
+    printf(" 8 - Atualizar produto\n");//ok
     printf(" 0 - Sair\n");//ok
+    
     printf("Digite uma opcao: ");
     scanf("%d", &opcao);
+    
     while(opcao < 0 || opcao > 8){
       printf("Opção inválida, digite novamente: ");
       scanf("%d", &opcao);
     }
     switch(opcao){
-      case 1:
-        //Loop que permite o cadastro de varios produtos
+      case 1: //Cadastro de produtos
         while(true){
           /*Confere se existem categorias para cadastrar produtos. Caso não existe
           ele nao permite cadastrar o produto*/
           if(tamanho(&l) == 0){
             printf("Ainda não foram cadastradas categorias! Crie uma categoria antes\n\n");
-
             if(!(voltarOuRepetirOP())){
+              system("clear");
               break;
             }
           }
           else{
-            //Leitura de dados e aloca em "regProduto"
             system("clear");
             Titulo();
-            printf("- CADASTRAR PRODUTO\n");
+            printf("- CADASTRAR PRODUTO -\n\n");
             getchar();
 
             printf("Digite o nome do produto: ");
@@ -114,7 +112,7 @@ int main(){
             printf("Digite a quantidade de unidades desse produto: ");
             scanf("%d", &regProduto.quantidade);
 
-            printf("Digite o id de identifição da categoria que quer vincular o produto (0 para cancelar operação): ");
+            printf("Digite o id de identifição da categoria que quer vincular o produto: ");
             scanf("%d", &idTemCat);
 
             //Verificação de cancelamento da operação
@@ -126,7 +124,6 @@ int main(){
               }
             }
             else{
-              //Chamando a função para cadastro do produto
               cadastrarProduto(&l, idTemCat, regProduto);
 
               if(!(voltarOuRepetirOP())){
@@ -160,13 +157,13 @@ int main(){
           }
         }
         break;
-      case 3:
+      case 3: //Deletar Categoria
         while(true){
           system("clear");
           Titulo();
           printf("Digite o ID da categoria que deseja excluir: ");
           scanf("%d", &delCat);
-          deletaCategoria(&l, delCat);
+          excluirCategoria(&l, delCat);
           
           if(!(voltarOuRepetirOP())){
             break;
@@ -174,26 +171,26 @@ int main(){
         }
         system("clear");
         break;
-      case 4:
+      case 4: //Deletar Produto
         while(true){
           system("clear");
           Titulo();
           printf("Digite o ID do produto para ser excluido: ");
           scanf("%d", &delProd);
-          deletaProduto(&l, delProd);
+          excluirProduto(&l, delProd);
           if(!(voltarOuRepetirOP())){
             break;
           }
         }
         system("clear");
         break;
-      case 5:
+      case 5: //Exibir Categorias
         system("clear");
         Titulo();
         printf("CATEGORIAS DISPONIVEIS:\n\n");
         exibirCategorias(&l);
         break;
-      case 6:
+      case 6: //Exibir todos os produtos
         system("clear");
         while(true){
           exibirTodosProdutos(&l);
@@ -203,43 +200,48 @@ int main(){
             }
         }
         break;
-      case 7:
+      case 7: // Buscar produto
         while(true){
           system("clear");
           Titulo();
-          printf("BUSCA DE PRODUTO\n");
+          printf("- BUSCA DE PRODUTO- \n\n");
           printf("Digite o ID do produto: ");
           scanf("%d", &idBusca);
           buscarProduto(&l, idBusca);
           if(!(voltarOuRepetirOP())){
-              system("clear");
-              break;
-            }
+            system("clear");
+            break;
+          }
         }
         break;
-      case 0:
-        sair();
+      case 8: // Atualizar produto
+        system("clear");
+        Titulo();
+        printf("Informe o ID do produto a ser atualizado: ");
+        scanf("%d", &idTemPro);
+        atualizarProduto(&l, idTemPro);
+        system("pause");
         break;
+      case 0:
+        system("clear");
+	      Titulo();
+	      printf("Obrigado, até a próxima!\n\n");
+	      exit(0);
+      }
     }
-  } while(true);
+    while(true);
 }
 
-int tamanho(LISTA* l) {
-	return l->tamanhoListaCategoria;
-}
 
-void inicializarLista(LISTA* l) {
-	l->tamanhoListaCategoria = 0;
-}
-
+/* --- Titulo do sistema --- */
 void Titulo() {
 	printf("\n***************************************");
 	printf("\n*       GERENCIADOR DE ESTOQUE        *\n");
  	printf("***************************************\n\n");
 }
 
-
-bool voltarOuRepetirOP() {
+/* --- Função para repetir operação ---*/
+bool voltarOuRepetirOP(){
 	int op;
 	while(true) {
     printf("\n1 - Repetir operação");
@@ -260,6 +262,16 @@ bool voltarOuRepetirOP() {
 	}
 }
 
+/* ---Funções de manipulação da lista --- */
+
+
+int tamanho(LISTA* l) {
+	return l->tamanhoListaCategoria;
+}
+
+void inicializarLista(LISTA* l) {
+	l->tamanhoListaCategoria = 0;
+}
 
 //Cadastro de Produtos
 bool cadastrarProduto(LISTA* l, int idCategoria, REGISTRO_PRODUTO reg){
@@ -299,7 +311,7 @@ bool cadastrarProduto(LISTA* l, int idCategoria, REGISTRO_PRODUTO reg){
     for(j = 0; j < l->tamanhoListaCategoria; j++){
       for(i = 0; i < l->registroCategoria[j].tamanhoListaProduto; j++){
         if(l->registroCategoria[j].registroProduto[i].chaveProduto == reg.chaveProduto){
-          printf("ID desse produto já existe. Tente novamente.\n\n");
+          printf("Este ID já existe! Registe um outro ID.\n\n");
           var2 = true;
           break;
         }
@@ -312,12 +324,12 @@ bool cadastrarProduto(LISTA* l, int idCategoria, REGISTRO_PRODUTO reg){
   l->registroCategoria[pos].tamanhoListaProduto++;
 
   printf("\nProduto cadastrado com sucesso!\n");
-  printf("Nome: %s\nID: %d\n", l->registroCategoria[pos].registroProduto[tamanho].nomeProduto, l->registroCategoria[pos].registroProduto[tamanho].chaveProduto);
-  printf("Valor: %.2f\nQuantidade: %d\n\n", l->registroCategoria[pos].registroProduto[tamanho].valor, l->registroCategoria[pos].registroProduto[tamanho].quantidade);
-
+  printf("ID: %d\n",l->registroCategoria[pos].registroProduto[tamanho].chaveProduto);
+  printf("Nome: %s\n", l->registroCategoria[pos].registroProduto[tamanho].nomeProduto);
+  printf("Valor: %.2f\n", l->registroCategoria[pos].registroProduto[tamanho].valor);
+  printf("Quantidade: %d\n\n", l->registroCategoria[pos].registroProduto[tamanho].quantidade);
   return true;
 }
-
 
 //Cadastro de Categoria
 bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i){
@@ -335,8 +347,9 @@ bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i){
 	l->registroCategoria[i].tamanhoListaProduto = 0;
 	l->tamanhoListaCategoria++;
 	
-	printf("\nCategoria cadastrada com sucesso!\n");
-	printf("Nome: %s, id: %d\n\n", l->registroCategoria[i].nomeCategoria,l->registroCategoria[i].chaveCategoria);
+	printf("\nCategoria cadastrada com sucesso!\n\n");
+	printf("ID: %d\n", l->registroCategoria[i].chaveCategoria);
+  printf("Nome: %s\n\n", l->registroCategoria[i].nomeCategoria);
 	
 	return true;
 }
@@ -344,7 +357,6 @@ bool cadastrarCategoria(LISTA *l, REGISTRO_CATEGORIA reg, int i){
 
 //Função para conferir a existencia de ID
 int confereIDCategoria(LISTA *l) {
-  setlocale(LC_ALL, "");
 	int i;
   bool j = true;
 	TIPOCHAVE aux;
@@ -367,8 +379,8 @@ int confereIDCategoria(LISTA *l) {
 	return aux;
 }
 
-//Deletar categoria
-bool deletaCategoria(LISTA *l, int idCategoria){
+//Excluir categoria
+bool excluirCategoria(LISTA *l, int idCategoria){
   int i, j;
   bool k = false;
 
@@ -406,8 +418,8 @@ bool deletaCategoria(LISTA *l, int idCategoria){
   }  
 }
 
-//Deletar produto
-bool deletaProduto(LISTA* l, int idProduto){
+//Excluir produto
+bool excluirProduto(LISTA* l, int idProduto){
   int aux1, aux2, k;
   bool tp;
 
@@ -433,7 +445,7 @@ bool deletaProduto(LISTA* l, int idProduto){
     printf("Produto deletado com sucesso!\n");
     return true;
   }
-  printf("Produto não existe\n") ;
+  printf("\nProduto não existe!\n") ;
   return false;
 
 }
@@ -457,7 +469,7 @@ bool exibirTodosProdutos(LISTA *l){
   int i, j;
 
   Titulo();
-  printf("LISTA DE PRODUTOS CADASTRADOS\n\n");
+  printf("- LISTA DE PRODUTOS CADASTRADOS -\n\n");
   if(l->tamanhoListaCategoria == 0){
     printf("Sem cadastro de produtos e categorias.\n\n");
     return false;
@@ -510,10 +522,106 @@ bool buscarProduto(LISTA *l, TIPOCHAVE idProduto){
   }
 }
 
-//Sair
-void sair() {
-	system("clear");;
-	Titulo();
-	printf("Obrigado, até a próxima!\n\n");
-	exit(0);
+//Atualização de produtos
+bool atualizarProduto(LISTA *l, int idProduto){
+  int i, j, qntdNova, opcao2;
+  bool m = false;
+  char novoNome[MAX_NOME];
+  float novoValor;
+
+  //Verifica se a lista não esta vazia
+  if(l->tamanhoListaCategoria == 0){
+    printf("Sem cadastro de produtos e categorias.\n\n");
+    return false;
+  }
+
+  for(i = 0; i < l->tamanhoListaCategoria; i++){
+    for(j = 0; j < l->registroCategoria[i].tamanhoListaProduto; j++){
+      if(l->registroCategoria[i].registroProduto[j].chaveProduto == idProduto){
+        m = true;
+        break;
+      }
+    }
+    if(m == true) break;
+  }
+  
+  if(m == false){
+    printf("Este produto não foi encontrado no estoque!\n\n");
+    return 0;
+  }
+  else{
+    do{ // SUBMENU
+      Titulo();
+      printf("OPERACOES:\n");
+      printf(" 1 - Alterar nome do produto\n");
+      printf(" 2 - Alterar quantidade do produto\n");
+      printf(" 3 - Alterar valor do produto\n");
+      printf(" 0 - Voltar ao menu principal\n");
+      printf("Digite uma opcao: ");
+      scanf("%d", &opcao2);
+
+      while(opcao2 < 0 || opcao2 > 3){
+        printf("Opção inválida, digite novamente: ");
+        scanf("%d", &opcao2);
+      }
+      switch(opcao2){
+        case 1: // Alterar nome do produto
+          l->registroCategoria[i].registroProduto[j].nomeProduto[0] = '\0';
+          printf("Digite o novo nome para o produto: ");
+          getchar();
+          scanf("%[^\n]s", novoNome);
+          strcpy(l->registroCategoria[i].registroProduto[j].nomeProduto, novoNome);
+
+
+          printf("\nNome alterado com sucesso!\n\n");
+          printf("ID: %d\n", l->registroCategoria[i].registroProduto[j].chaveProduto);
+          printf("Nome do produto: %s\n", l->registroCategoria[i].registroProduto[j].nomeProduto);
+          printf("Preço: %.2f\n", l->registroCategoria[i].registroProduto[j].valor);
+          printf("Quantidade em estoque: %d\n\n", l->registroCategoria[i].registroProduto[j].quantidade);
+          if(!(voltarOuRepetirOP())){
+            system("clear");
+            break;
+          }
+          break;
+        
+        case 2: //Alterar quantidade do produto
+          printf("Digite a nova quantidade do produto: ");
+          scanf("%d", &qntdNova);
+
+          l->registroCategoria[i].registroProduto[j].quantidade = qntdNova;
+
+          printf("\nQuantidade de produtos alterado com sucesso!\n\n");
+          printf("ID: %d\n", l->registroCategoria[i].registroProduto[j].chaveProduto);
+          printf("Nome do produto: %s\n", l->registroCategoria[i].registroProduto[j].nomeProduto);
+          printf("Preço: %.2f\n", l->registroCategoria[i].registroProduto[j].valor);
+          printf("Quantidade em estoque: %d\n\n", l->registroCategoria[i].registroProduto[j].quantidade);
+          if(!(voltarOuRepetirOP())){
+            system("clear");
+            break;
+          }
+          break;
+        
+        case 3: //Alterar valor do produto
+          printf("Digite um novo valor para o produto: ");
+          scanf("%f", &novoValor);
+
+          l->registroCategoria[i].registroProduto[j].valor = novoValor;
+          printf("\nValor do produto alterado com sucesso!\n\n");
+          printf("ID: %d\n", l->registroCategoria[i].registroProduto[j].chaveProduto);
+          printf("Nome do produto: %s\n", l->registroCategoria[i].registroProduto[j].nomeProduto);
+          printf("Preço: %.2f\n", l->registroCategoria[i].registroProduto[j].valor);
+          printf("Quantidade em estoque: %d\n\n", l->registroCategoria[i].registroProduto[j].quantidade);
+          if(!(voltarOuRepetirOP())){
+            system("clear");
+            break;
+          }
+          break;
+
+        case 0: //Voltar ao menu principal
+          return true;
+          break;
+      }
+    }
+    while(true);
+  }
 }
