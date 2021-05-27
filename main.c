@@ -111,6 +111,13 @@ int main(){
 
             printf("Digite a quantidade de unidades desse produto: ");
             scanf("%d", &regProduto.quantidade);
+            
+            //Validação da quantidade de produtos
+            while(regProduto.quantidade <= 0){
+              printf("\nÉ necessário o cadastro de pelo menos uma unidade desse produto!\n");
+              printf("Digite a quantidade de unidades desse produto: ");
+              scanf("%d", &regProduto.quantidade);
+            }
 
             printf("Digite o id de identifição da categoria que quer vincular o produto: ");
             scanf("%d", &idTemCat);
